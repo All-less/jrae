@@ -25,7 +25,7 @@ configurations {
 dependencies {
     implementation fileTree(dir: 'libs', include: ['*.jar'])
 
-    // we re-list them so as to use them in fatJar
+    // we re-list them so as to include them in fatJar
     includeInFatJar fileTree(dir: 'libs', include: ['*.jar'])
 }
 
