@@ -1,0 +1,81 @@
+plugins {
+    id 'java'
+    id 'maven-publish'
+    id 'application'
+}
+
+sourceCompatibility = '1.8'
+targetCompatibility = '1.8'
+
+group = 'com.allless'
+version = '0.0.1'
+
+sourceSets {
+    main {
+        java {
+            srcDir 'src'
+        }
+    }
+}
+
+configurations {
+    includeInFatJar
+}
+
+dependencies {
+    implementation fileTree(dir: 'libs', include: ['*.jar'])
+
+    // we re-list them so as to use them in fatJar
+    includeInFatJar fileTree(dir: 'libs', include: ['*.jar'])
+}
+
+application {
+    mainClassName = 'main.RAEBuilder'
+    applicationDefaultJvmArgs = [
+        '-Djava.library.path=' + (new File('.').absolutePath) + '/libs',
+        '-XX:+UseTLAB',
+        '-XX:+UseConcMarkSweepGC',
+        '-cp',
+        '.:bin/:libs/*'
+    ]
+    run {
+        args = [
+            '-DataDir',                 'data/mov',
+            '-MaxIterations',           '1',
+            '-ModelFile',               'data/mov/tunedTheta.rae',
+            '-ClassifierFile',          'data/mov/Softmax.clf',
+            '-NumCores',                '3',
+            '-TrainModel',              'True',
+            '-ProbabilitiesOutputFile', 'data/mov/prob.out',
+            '-TreeDumpDir',             'data/mov/trees'
+        ]
+    }
+}
+
+task sourcesJar(type: Jar) {
+    from sourceSets.main.allJava
+    classifier = 'sources'
+}
+
+task fatJar(type: Jar) {
+    manifest {
+        attributes 'Implementation-Title': 'jrae',
+            'Implementation-Version': version,
+            'Main-Class': 'main.RAEBuilder'
+    }
+    from { configurations.includeInFatJar.collect { it.isDirectory() ? it : zipTree(it) } }
+    with jar
+}
+
+publishing {
+    publications {
+        mavenJava(MavenPublication) {
+            artifactId = 'jrae'
+            artifact fatJar
+            pom {
+                name = 'JRAE'
+                description = 'A JAVA implementation of recursive autoencoder.'
+            }
+        }
+    }
+}
