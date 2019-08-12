@@ -2,6 +2,9 @@
 
 The original documentation can be found [here](https://github.com/sancha/jrae).
 
+### Prerequisite
+
+- [gradle 5.0+](https://gradle.org/)
 
 ### Quick Start
 
